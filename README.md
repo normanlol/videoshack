@@ -1,5 +1,3 @@
-*I am aware this repo is currently (pretty much) empty. This will change when I get home, I just made this so I won't forget the idea.*
-
 # videoshack
 VideoShack is a video meta search engine written in NodeJS.
 
@@ -7,28 +5,27 @@ Meant as an alternative for *Peteyvid*, VideoShack (will) scrape tons of sites t
 
 ## Sites Supported
 - YouTube
-- Twitter
-- Reddit
 - Vimeo
 - BitChute
 - Dailymotion
 - Bilibili
-- Archive.org
-- Facebook
 - QQ.com
+- Metacafe
+- Archive.org
+- Newgrounds
+- Reddit
+- Google Drive & MEGA (via Reddit)
+- Rumble
+- Soundcloud
+
+### To Be Supported
+- Twitter
+- Facebook
 - OK.RU
 - Tumblr
-- Youku
-- Newgrounds
 - VK
-- Rumble
 - VEOH
-- Metacafe
-- Twitch VODs
-- *Some* PeerTube instances
 - TikTok
-- Google Drive & MEGA (via Reddit)
-- Soundcloud
 
 ## Features
 - Free, open sourced, public domain code

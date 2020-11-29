@@ -1,0 +1,32 @@
+{
+  "name": "videoshack",
+  "version": "1.0.0",
+  "description": "video meta search engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/search.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/normanlol/videoshack.git"
+  },
+  "keywords": [
+    "search",
+    "videos",
+    "video",
+    "search-engine"
+  ],
+  "author": "n0rmancodes",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/normanlol/videoshack/issues"
+  },
+  "homepage": "https://github.com/normanlol/videoshack#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "got": "^11.8.0",
+    "redddit": "^1.1.0",
+    "sc-searcher": "^1.0.5",
+    "ytsr": "git://github.com/TimeForANinja/node-ytsr.git#wip-api-adjustments"
+  }
+}
