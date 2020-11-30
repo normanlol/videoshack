@@ -4,6 +4,7 @@ const fs = require("fs");
 const ytsr = require("ytsr");
 const cheerio = require("cheerio");
 const got = require("got");
+const { isFunction } = require("util");
 
 http.createServer(hostServer).listen(process.env.PORT || 8228);
 
@@ -211,10 +212,143 @@ async function hostServer(request, response) {
                     });
                     response.end(errObj);
                 })
-
+            } else if (pathP[2] == "bilibili") {
+                got("https://search.bilibili.com/video?keyword=" + u.query.q + "&from_source=nav_search_new", {
+                    headers: {
+                        "Host": "search.bilibili.com",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "DNT": "1",
+                        "Connection": "keep-alive",
+                        "Upgrade-Insecure-Requests": "1",
+                        "Sec-GPC": "1"
+                    }
+                }).then(function(resp) {
+                    var $ = cheerio.load(resp.body);
+                    var final = [];
+                    for (var c in $(".video-list li")) {
+                        if ($(".video-list li .img-anchor")[c].attribs !== undefined && $(".video-list li .img-anchor")[c].attribs.title !== undefined) {
+                            var t = $(".video-list li .img-anchor")[c].attribs.title;
+                            var th = $(".video-list li .img .lazy-img")[c].children[0].attribs.src;
+                            var a = $(".video-list li .up-name")[c].children[0].data;
+                            var aL = "https:" + $(".video-list li .up-name")[c].attribs.href.split("?")[0];
+                            var ur = "https:" + $(".video-list li .title")[c].attribs.href.split("?")[0];
+                            var blob = {
+                                "title": t,
+                                "url": ur,
+                                "thumbnail": th,
+                                "creatorName": a,
+                                "creatorUrl": aL
+                            };
+                            final.push(blob);
+                        }
+                    }
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
+            } else if (pathP[2] == "metacafe") {
+                got("https://www.metacafe.com/videos_about/" + u.query.q, {
+                    headers: {
+                        "Host": "www.metacafe.com",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "DNT": "1",
+                        "Connection": "keep-alive",
+                        "Upgrade-Insecure-Requests": "1",
+                        "Sec-GPC": "1"
+                    }
+                }).then(function(resp) {
+                    var $ = cheerio.load(resp.body);
+                    for (var c in $("#search_videos_videos_list_search_result .item")) {
+                        if (
+                            $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children !== undefined &&
+                            $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0] !== undefined
+                        ) {
+                            var tit = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0].data;
+                            if (tit == "!DOCTYPE html" | !$("#search_videos_videos_list_search_result .item .thumb")[c] == undefined) {continue;} else {
+                                var t = JSON.parse($("#search_videos_videos_list_search_result .item .thumb")[c].attribs.onscreenover.split("this, ")[1].split(")")[0].replace("\\s", "").replace("\\t", ""));
+                                console.log(t)
+                            }
+                        }
+                        
+                    }
+                }).catch(function(err) {
+                    console.log(err)
+                })
+            } else {
+                var errObj = JSON.stringify({
+                    "err": {
+                        "message": "This search endpoint does not exist.",
+                        "code": "noSearchEnd"
+                    }
+                })
+                response.writeHead(404, {
+                    "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "application/json"
+                });
+                response.end(errObj);
             }
+        } else {
+            var errObj = JSON.stringify({
+                "err": {
+                    "message": "This endpoint does not exist.",
+                    "code": "invalidEndpoint"
+                }
+            })
+            response.writeHead(404, {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
+            });
+            response.end(errObj);
         }
     } else {
 
     }
+}
+
+
+function extractQQTitle(cs) {
+    if (isfunction(cs)) {return null;}
+    for (var c in cs) {
+        var result = "";
+        for (var c in cs) {
+            if (cs[c].type == "text") {
+                var result = result + cs[c].data;
+            } else if (cs[c].type == "tag") {
+                if (cs[c].name == "em") {
+                    for (var cc in cs[c].children) {
+                        var result = result + cs[c].children[cc].data;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
+
+function isfunction(functionToCheck) {
+    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 }

@@ -104,7 +104,7 @@ got("https://www.bitchute.com/search/?query=test&kind=video", {
 })
 
 // bilibili search
-got("https://search.bilibili.com/all?keyword=test&from_source=nav_search_new", {
+got("https://search.bilibili.com/video?keyword=test&from_source=nav_search_new", {
     headers: {
         "Host": "search.bilibili.com",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
