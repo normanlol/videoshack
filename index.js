@@ -4,7 +4,9 @@ const fs = require("fs");
 const ytsr = require("ytsr");
 const cheerio = require("cheerio");
 const got = require("got");
-const { isFunction } = require("util");
+const redddit = require("redddit");
+const sc = require("sc-searcher");
+const scSearch = new sc();
 
 http.createServer(hostServer).listen(process.env.PORT || 8228);
 
@@ -20,7 +22,7 @@ async function hostServer(request, response) {
                         var newObj = {
                             "title": resp.items[c].title,
                             "url": resp.items[c].link,
-                            "thumbnail": resp.items[c].bestThumbnail.url,
+                            "thumbnail": resp.items[c].bestThumbnail.url.split("?"),
                             "creatorName": resp.items[c].author.name,
                             "creatorUrl": resp.items[c].author.ref
                         }
@@ -281,22 +283,397 @@ async function hostServer(request, response) {
                         "Sec-GPC": "1"
                     }
                 }).then(function(resp) {
+                    var final = [];
                     var $ = cheerio.load(resp.body);
                     for (var c in $("#search_videos_videos_list_search_result .item")) {
                         if (
                             $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children !== undefined &&
-                            $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0] !== undefined
+                            $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0] !== undefined 
                         ) {
                             var tit = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0].data;
-                            if (tit == "!DOCTYPE html" | !$("#search_videos_videos_list_search_result .item .thumb")[c] == undefined) {continue;} else {
-                                var t = JSON.parse($("#search_videos_videos_list_search_result .item .thumb")[c].attribs.onscreenover.split("this, ")[1].split(")")[0].replace("\\s", "").replace("\\t", ""));
-                                console.log(t)
+                            if (tit == "!DOCTYPE html" | tit == undefined) {continue;} else {
+                                var au = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].children[0].data ;
+                                var aul = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs.href;
+                                if (aul == "https://www.metacafe.com/login-required/") {continue;}
+                                var ur = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].attribs.href;
+                                if ($("#search_videos_videos_list_search_result .item .mc-new-item-image img")[c] == undefined) {var th = null;} else {
+                                    var th = JSON.stringify($("#search_videos_videos_list_search_result .item .mc-new-item-image img")[c].attribs.onscreenover.split("selectImgSrc(this, ")[1].split(")")[0])
+                                    var th = th.split("src: '")[1].split("'}")[0]
+                                }
+                                var blob = {
+                                    "title": tit,
+                                    "url": ur,
+                                    "thumbnail": th,
+                                    "creatorName": au,
+                                    "creatorUrl": aul
+                                };
+                                final.push(blob);
                             }
                         }
-                        
                     }
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
                 }).catch(function(err) {
-                    console.log(err)
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
+            } else if (pathP[2] == "archiveorg") {
+                got("https://archive.org/details/movies?and%5B%5D=" + u.query.q + "&sin=&and%5B%5D=mediatype%3A%22movies%22", {
+                    headers: {
+                        "Host": "archive.org",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "DNT": "1",
+                        "Connection": "keep-alive",
+                        "Upgrade-Insecure-Requests": "1",
+                        "Sec-GPC": "1"
+                    }
+                }).then(function(resp) {
+                    var $ = cheerio.load(resp.body);
+                    var final = [];
+                    for (var c in $(".results .item-ia")) {
+                        if (
+                            $(".results .item-ia .C234 div a")[c] !== undefined && 
+                            $(".results .item-ia .C234 div a")[c].attribs !== undefined && 
+                            $(".results .item-ia .C234 div a")[c].attribs.href !== undefined
+                        ) {
+                            var ur = "https://archive.org" + $(".results .item-ia .C234 .C2 a")[c].attribs.href;
+                            var t = $(".results .item-ia .C234 .C2 .ttl")[c].children[0].data
+                            var t = t.replace(/^\s+|\s+$/g, "");
+                            if ($(".results .item-ia .C234 .by .byv")[c] == undefined) {continue;}
+                            var auth = $(".results .item-ia .C234 .by .byv")[c].children[0].data;
+                            var authL = null;
+                            var th = "https://archive.org" + $(".results .item-ia .C234 .C2 img")[c].attribs.source
+                            var blob = {
+                                "title": t,
+                                "url": ur,
+                                "thumbnail": th,
+                                "creatorName": auth,
+                                "creatorUrl": authL
+                            };
+                            final.push(blob);
+                        }
+                    } 
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
+            } else if (pathP[2] == "newgrounds") {
+                got("https://www.newgrounds.com/search/conduct/movies?suitabilities=etm&terms=" + u.query.q, {
+                    headers: {
+                        "Host": "www.newgrounds.com",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "DNT": "1",
+                        "Connection": "keep-alive",
+                        "Upgrade-Insecure-Requests": "1",
+                        "Sec-GPC": "1"
+                    }
+                }).then(function(resp) {
+                    var $ = cheerio.load(resp.body);
+                    var l = ($(".itemlist li").length - 1);
+                    var final = [];
+                    for (var c in $(".itemlist li")) {
+                        if ($(".itemlist li a")[c].attribs == undefined) {continue;}
+                        else if ($(".itemlist li a")[c].attribs.href == undefined) {continue;}
+                        else if ($(".itemlist li a")[c].attribs.href.substring(0,1) == "/") {continue;}
+                        var ur = $(".itemlist li a")[c].attribs.href;
+                        var th = $(".itemlist li a .item-icon div img")[c].attribs.src.split("?")[0];
+                        var t = extractQQTitle($(".itemlist li a .detail-title h4")[c]).replace(/^\s+|\s+$/g, "");
+                        var au = $(".itemlist li a .detail-title span strong")[c].children[0].data;
+                        var auL = null;
+                        var blob = {
+                            "title": t,
+                            "url": ur,
+                            "thumbnail": th,
+                            "creatorName": au,
+                            "creatorUrl": auL
+                        };
+                        final.push(blob);
+                    }  
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
+            } else if (pathP[2] == "rumble") {
+                got("https://rumble.com/search/video?q=" + u.query.q, {
+                    headers: {
+                        "Host": "rumble.com",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "DNT": "1",
+                        "Connection": "keep-alive",
+                        "Upgrade-Insecure-Requests": "1",
+                        "Sec-GPC": "1"
+                    }
+                }).then(function(resp) {
+                    var $ = cheerio.load(resp.body);
+                    var final = [];
+                    for (var c in $(".video-listing-entry")) {
+                        if ($(".video-listing-entry article h3")[c] == undefined) {continue;} 
+                        else if ($(".video-listing-entry article h3")[c].children == undefined) {continue;} 
+                        else if ($(".video-listing-entry article h3")[c].children[0] == undefined) {continue;}
+                        else if ($(".video-listing-entry article h3")[c].children[0].data == "!DOCTYPE html") {continue;}
+                        var t = $(".video-listing-entry article h3")[c].children[0].data;
+                        var th = $(".video-listing-entry article .video-item--a img")[c].attribs.src;
+                        var au = $(".video-listing-entry article footer address a .ellipsis-1")[c].children[0].data;
+                        var auL = "https://rumble.com" + $(".video-listing-entry article footer address a")[c].attribs.href;
+                        var ur = "https://rumble.com" + $(".video-listing-entry article .video-item--a")[c].attribs.href;
+                        var blob = {
+                            "title": t,
+                            "url": ur,
+                            "thumbnail": th,
+                            "creatorName": au,
+                            "creatorUrl": auL
+                        };
+                        final.push(blob);
+                    }
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
+            } else if (pathP[2] == "reddit") {
+                redddit.search("site:v.redd.it " + u.query.q, function(err, resp) {
+                    if (err) {
+                        var errObj = JSON.stringify({
+                            "err": {
+                                "message": err.message,
+                                "code": err.code
+                            }
+                        });
+                        response.writeHead(500, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(errObj);
+                    } else {
+                        var final = [];
+                        for (var c in resp) {
+                            var t = resp[c].data.title;
+                            var th = resp[c].data.thumbnail;
+                            var ur = resp[c].data.url_overridden_by_dest;
+                            var au = resp[c].data.author
+                            var auL = "https://reddit.com/u/" + resp[c].data.author
+                            var blob = {
+                                "title": t,
+                                "url": ur,
+                                "thumbnail": th,
+                                "creatorName": au,
+                                "creatorUrl": auL
+                            };
+                            final.push(blob);
+                        }
+                        var json = JSON.stringify({
+                            "query": u.query.q,
+                            "results": final
+                        })
+                        response.writeHead(200, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(json);
+                    }
+                })
+            } else if (pathP[2] == "meganz") {
+                redddit.search("site:mega.nz " + u.query.q, function(err, resp) {
+                    if (err) {
+                        var errObj = JSON.stringify({
+                            "err": {
+                                "message": err.message,
+                                "code": err.code
+                            }
+                        });
+                        response.writeHead(500, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(errObj);
+                    } else {
+                        var final = [];
+                        for (var c in resp) {
+                            var t = resp[c].data.title;
+                            var th = resp[c].data.thumbnail;
+                            var ur = resp[c].data.url_overridden_by_dest;
+                            var au = resp[c].data.author
+                            var auL = "https://reddit.com/u/" + resp[c].data.author
+                            var blob = {
+                                "title": t,
+                                "url": ur,
+                                "thumbnail": th,
+                                "creatorName": au,
+                                "creatorUrl": auL
+                            };
+                            final.push(blob);
+                        }
+                        var json = JSON.stringify({
+                            "query": u.query.q,
+                            "results": final
+                        })
+                        response.writeHead(200, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(json);
+                    }
+                })
+            } else if (pathP[2] == "gdrive") {
+                redddit.search("site:drive.google.com " + u.query.q, function(err, resp) {
+                    if (err) {
+                        var errObj = JSON.stringify({
+                            "err": {
+                                "message": err.message,
+                                "code": err.code
+                            }
+                        });
+                        response.writeHead(500, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(errObj);
+                    } else {
+                        var final = [];
+                        for (var c in resp) {
+                            var t = resp[c].data.title;
+                            var th = resp[c].data.thumbnail;
+                            var ur = resp[c].data.url_overridden_by_dest;
+                            var au = resp[c].data.author
+                            var auL = "https://reddit.com/u/" + resp[c].data.author
+                            var blob = {
+                                "title": t,
+                                "url": ur,
+                                "thumbnail": th,
+                                "creatorName": au,
+                                "creatorUrl": auL
+                            };
+                            final.push(blob);
+                        }
+                        var json = JSON.stringify({
+                            "query": u.query.q,
+                            "results": final
+                        })
+                        response.writeHead(200, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(json);
+                    }
+                })
+            } else if (pathP[2] == "soundcloud") {
+                var final = [];
+                scSearch.init("38kZjAWhqvwrcMFKFo3496SY4OsSovTU");
+                scSearch.getTracks(u.query.q, 100).then(function(resp) {
+                    for (var c in resp) {
+                        var t = resp[c].title;
+                        var th = resp[c].artwork_url;
+                        var ur = resp[c].permalink_url;
+                        var au = resp[c].user.full_name;
+                        var auL = resp[c].user.permalink_url;
+                        var blob = {
+                            "title": t,
+                            "url": ur,
+                            "thumbnail": th,
+                            "creatorName": au,
+                            "creatorUrl": auL
+                        };
+                        final.push(blob);
+                    }
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
                 })
             } else {
                 var errObj = JSON.stringify({
@@ -331,14 +708,13 @@ async function hostServer(request, response) {
 
 
 function extractQQTitle(cs) {
-    if (isfunction(cs)) {return null;}
     for (var c in cs) {
         var result = "";
         for (var c in cs) {
             if (cs[c].type == "text") {
                 var result = result + cs[c].data;
             } else if (cs[c].type == "tag") {
-                if (cs[c].name == "em") {
+                if (cs[c].name == "mark") {
                     for (var cc in cs[c].children) {
                         var result = result + cs[c].children[cc].data;
                     }
@@ -347,8 +723,4 @@ function extractQQTitle(cs) {
         }
         return result;
     }
-}
-
-function isfunction(functionToCheck) {
-    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
 }

@@ -9,7 +9,6 @@ Meant as an alternative for *Peteyvid*, VideoShack (will) scrape tons of sites t
 - BitChute
 - Dailymotion
 - Bilibili
-- QQ.com
 - Metacafe
 - Archive.org
 - Newgrounds
@@ -26,6 +25,7 @@ Meant as an alternative for *Peteyvid*, VideoShack (will) scrape tons of sites t
 - VK
 - VEOH
 - TikTok
+- QQ.com
 
 ## Features
 - Free, open sourced, public domain code
