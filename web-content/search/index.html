@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>videoshack - find videos online</title>
+        <link href="/css/style.css" rel="stylesheet">
+        <meta charset="ISO-8859-1">
+    </head>
+    <body>
+        <div class="header">
+            <a href="/"><h1>videoshack</h1></a>
+            <input id="q" placeholder="Search through millions of videos.">
+        </div>
+        <div class="results">
+            <noscript>This webapp requires Javascript to be enabled.</noscript>
+            <div id="loader" style="display:none;">
+                <h2 id="s">searching <span id="scraper">[...]</span> for <span id="query">[...]</span>...</h2>
+                <p id="resultCount"></p>
+            </div>
+            <div id="resultsContainer">
+
+            </div>
+        </div>
+        <script src="/global.app.js"></script>
+        <script src="/search/index.js"></script>
+    </body>
+</html>

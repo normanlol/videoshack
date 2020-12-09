@@ -7,8 +7,10 @@ const got = require("got");
 const redddit = require("redddit");
 const sc = require("sc-searcher");
 const scSearch = new sc();
+const port = process.env.PORT || 8228
 
-http.createServer(hostServer).listen(process.env.PORT || 8228);
+http.createServer(hostServer).listen(port);
+console.log(" -- videoshack server started on port " + port + " -- ")
 
 async function hostServer(request, response) {
     var u = url.parse(request.url, true);
@@ -22,7 +24,7 @@ async function hostServer(request, response) {
                         var newObj = {
                             "title": resp.items[c].title,
                             "url": resp.items[c].link,
-                            "thumbnail": resp.items[c].bestThumbnail.url.split("?"),
+                            "thumbnail": resp.items[c].bestThumbnail.url.split("?")[0],
                             "creatorName": resp.items[c].author.name,
                             "creatorUrl": resp.items[c].author.ref
                         }
@@ -701,8 +703,151 @@ async function hostServer(request, response) {
             });
             response.end(errObj);
         }
+    } else if (pathP[0] == "proxy") {
+        var ur = Buffer.from(u.pathname.substring(7), "base64").toString();
+        got(ur, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate, br",
+                "DNT": "1",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-GPC": "1"
+            }
+        }).then(function(resp) {
+            
+            response.writeHead(resp.statusCode, resp.headers);
+            response.end(resp.rawBody);
+        }).catch(function(err) {
+            if (err.response) {
+                response.writeHead(err.response.statusCode, err.response.headers);
+                response.end(err.response.rawBody);
+            } else {
+                response.writeHead(500)
+                response.end(err.stack)
+            }
+        })
     } else {
-
+        if (fs.existsSync("./web-content" + u.pathname + "index.html")) {
+            var path = "./web-content" + u.pathname + "index.html";
+            fs.readFile(path, function(err, resp) {
+                if (err) {
+                    fs.readFile("./error-pages/500.html", function(err, resp) {
+                        if (err) {
+                            resp.end(err.stack);
+                        } else {
+                            var $ = cheerio.load(resp);
+                            $("#errStack").text(err.stack);
+                            response.end($.html());
+                        }
+                    })
+                } else {
+                    response.writeHead(200,  {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "text/html"
+                    });
+                    response.end(resp);
+                }
+            })
+        } else if (fs.existsSync("./web-content" + u.pathname + "/index.html")) {
+            var path = "./web-content" + u.pathname + "/index.html";
+            fs.readFile(path, function(err, resp) {
+                if (err) {
+                    fs.readFile("./error-pages/500.html", function(err, resp) {
+                        if (err) {
+                            resp.end(err.stack);
+                        } else {
+                            var $ = cheerio.load(resp);
+                            $("#errStack").text(err.stack);
+                            response.end($.html());
+                        }
+                    })
+                } else {
+                    response.writeHead(200,  {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "text/html"
+                    });
+                    response.end(resp);
+                }
+            })
+        } else if (fs.existsSync("./web-content" + u.pathname)) {
+            var path = "./web-content" + u.pathname;
+            var type = path.split(".")[path.split(".").length - 1];
+            if (type == "css") {
+                var cType = "text/css";
+            } else if (type == "js") {
+                var cType = "application/javascript";
+            } else if (type == "html") {
+                var cType = "text/html"
+            } else if (type == "jpg") {
+                var cType = "image/jpeg"
+            } else if (type == "png") {
+                var cType = "image/png"
+            }
+            fs.readFile(path, function(err, resp) {
+                if (err) {
+                    if (err.code == "EISDIR") {
+                        fs.readFile("./error-pages/404.html", function(err, resp) {
+                            if (err) {
+                                fs.readFile("./error-pages/500.html", function(err, resp) {
+                                    if (err) {
+                                        resp.end(err.stack);
+                                    } else {
+                                        var $ = cheerio.load(resp);
+                                        $("#errStack").text(err.stack);
+                                        response.end($.html());
+                                    }
+                                })
+                            } else {
+                                response.writeHead(404, {
+                                    "Access-Control-Allow-Origin": "*",
+                                    "Content-Type": "text/html"
+                                });
+                                response.end(resp);
+                            }
+                        })
+                    } else {
+                        fs.readFile("./error-pages/500.html", function(err, resp) {
+                            if (err) {
+                                resp.end(err.stack);
+                            } else {
+                                var $ = cheerio.load(resp);
+                                $("#errStack").text(err.stack);
+                                response.end($.html());
+                            }
+                        })
+                    }
+                } else {
+                    response.writeHead(200,  {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": cType
+                    });
+                    response.end(resp);
+                }
+            })
+        } else {
+            fs.readFile("./error-pages/404.html", function(err, resp) {
+                if (err) {
+                    fs.readFile("./error-pages/500.html", function(err, resp) {
+                        if (err) {
+                            resp.end(err.stack);
+                        } else {
+                            var $ = cheerio.load(resp);
+                            $("#errStack").text(err.stack);
+                            response.end($.html());
+                        }
+                    })
+                } else {
+                    response.writeHead(404, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "text/html"
+                    });
+                    response.end(resp);
+                }
+            })
+        }
     }
 }
 

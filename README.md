@@ -19,6 +19,7 @@ Meant as an alternative for *Peteyvid*, VideoShack (will) scrape tons of sites t
 
 ### To Be Supported
 - Twitter
+- Dumpert.nl
 - Facebook
 - OK.RU
 - Tumblr
