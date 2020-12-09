@@ -5,6 +5,8 @@ Meant as an alternative for *Peteyvid*, VideoShack scrape tons of sites to find 
 
 You can host your own instance in a couple easy steps [here](./documentation/installation/README.md).
 
+[VideoShack Official Instance](https://videoshack.org) - Hosted by [electrohaxz.tk](http://electrohaxz.tk)
+
 ## Sites Supported
 - YouTube
 - Vimeo
