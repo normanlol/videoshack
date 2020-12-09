@@ -1,7 +1,7 @@
 # videoshack
 VideoShack is a video meta search engine written in NodeJS.
 
-Meant as an alternative for *Peteyvid*, VideoShack (will) scrape tons of sites to find the best video in your interest, while focusing on privacy with no logging whatsoever.
+Meant as an alternative for *Peteyvid*, VideoShack scrape tons of sites to find the best video in your interest, while focusing on privacy with no logging whatsoever.
 
 You can host your own instance in a couple easy steps [here](./documentation/installation/README.md).
 
