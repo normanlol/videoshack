@@ -73,6 +73,12 @@ function runSearch() {
     xhr.send();
     xhr.onload = function () {
         var json = JSON.parse(xhr.responseText);
+        if (json.err) {
+            var nIndex = index + 1;
+            localStorage.setItem("index", nIndex.toString());
+            runSearch();
+            return;
+        }
         for (var c in json.results) {
             var a = document.createElement("A");
             a.href = json.results[c].url;
