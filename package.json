@@ -27,6 +27,6 @@
     "got": "^11.8.0",
     "redddit": "^1.1.0",
     "sc-searcher": "^1.0.5",
-    "ytsr": "git://github.com/TimeForANinja/node-ytsr.git#wip-api-adjustments"
+    "ytsr": "^2.0.0-alpha.4"
   }
 }
