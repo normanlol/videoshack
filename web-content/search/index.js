@@ -1,12 +1,21 @@
 load();
 
 function load() {
-    var query = window.location.search.substring(3);
+    var query = window.location.search.substring(3).split("&")[0];
     document.getElementById("loader").style.display = "";
     document.getElementById("query").innerHTML = decodeURIComponent(query);
     localStorage.setItem("index", "0");
     document.getElementById("resultCount").innerHTML = "No videos found so far."
     runSearch();
+}
+
+function isIgnored(apiName) {
+    if (window.location.search.split("ignore=")[1] == undefined) {return false;}
+    var ignored = window.location.search.split("ignore=")[1].split("&")[0].split(",");
+    for (var c in ignored) {
+        if (ignored[c] == apiName) {return true;} else {continue;}
+    }
+    return false;
 }
 
 function runSearch() {
@@ -61,10 +70,16 @@ function runSearch() {
         }
     ]
     var index = parseInt(localStorage.getItem("index"));
-    var query = window.location.search.substring(3);
+    var query = window.location.search.substring(3).split("&")[0];
     if (scrapers[index] == undefined) {
         document.getElementById("s").innerHTML = "finished searching!"
         document.getElementById("resultCount").innerHTML = document.querySelectorAll("#resultsContainer a").length.toLocaleString() + " videos found.";
+        return;
+    }
+    if (isIgnored(scrapers[index].apiName) == true) {
+        var nIndex = index + 1;
+        localStorage.setItem("index", nIndex.toString());
+        runSearch();
         return;
     }
     document.getElementById("scraper").innerHTML = scrapers[index].safeName;

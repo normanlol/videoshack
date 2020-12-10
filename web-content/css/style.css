@@ -35,6 +35,39 @@ html, body {
     margin:0;
 }
 
+.gallery {
+    padding-top:1%;
+    transition:width 0.5s, height 0.5s, opacity 0.5s;
+    overflow:hidden;
+}
+
+.gallery * {
+    position:relative;
+}
+
+.closed {
+    width:0%;
+    opacity:0;
+}
+
+.open {
+    width:100%;
+    height:auto;
+    opacity:1;
+}
+
+button[value="true"] {
+    background:#004000;
+    color:white;
+    border:0;
+}
+
+button[value="false"] {
+    background:#400300;
+    color:white;
+    border:0;
+}
+
 @media (max-width:1200px) {
     .p {
         width:100%;
@@ -43,6 +76,11 @@ html, body {
     .p h1 {
         font-size:120px;
         margin:0;
+    }
+    .p h2 {
+        font-size:64px;
+        margin:0;
+        width:100%;
     }
     .p input {
         width:50%;
@@ -59,6 +97,9 @@ html, body {
     .header input {
         width:80%;
         height:26px;
+    }
+    .header button {
+        margin-top:3%;
     }
     .results {
         margin-top:3%;
@@ -103,6 +144,11 @@ html, body {
         margin:0;
         width:99%;
     }
+    .p h2 {
+        font-size:64px;
+        margin:0;
+        width:100%;
+    }
     .p input {
         width:99%;
         height:26px;
@@ -121,10 +167,17 @@ html, body {
         margin:0;
     }
     .header input {
-        height:25px;
+        height:28px;
         width:50%;
         margin-left:1.5%;
         margin-top:4px;
+        padding-top:0;
+        padding-bottom:0;
+    }
+    .header button {
+        margin-top:4px;
+        margin-left:1%;
+        height:32px;
     }
     .results {
         margin-left:2.25%;

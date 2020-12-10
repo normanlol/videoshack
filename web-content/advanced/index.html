@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>advanced search - videoshack</title>
+        <link href="/css/style.css" rel="stylesheet">
+        <meta charset="ISO-8859-1">
+    </head>
+    <body class="noScroll">
+        <div class="cp">
+            <div class="p">
+                <h2>advanced search</h2>
+                <input id="q" placeholder="search any video." autofocus="true">
+                <div class="filters">
+                    <button onclick="toggleDisplay('sites')">toggle sites</button>
+                </div>
+                <div id="sites" class="gallery closed" style="max-height:18px;">
+                    <button id="youtube" value="true" onclick="updateVal(this.id)">youtube</button>
+                    <button id="vimeo" value="true" onclick="updateVal(this.id)">vimeo</button>
+                    <button id="bitchute" value="true" onclick="updateVal(this.id)">bitchute</button>
+                    <button id="bilibili" value="true" onclick="updateVal(this.id)">bilibili</button>
+                    <button id="dailymotion" value="true" onclick="updateVal(this.id)">dailymotion</button>
+                    <button id="metacafe" value="true" onclick="updateVal(this.id)">metacafe</button>
+                    <button id="archiveorg" value="true" onclick="updateVal(this.id)">archive.org</button>
+                    <button id="newgrounds" value="true" onclick="updateVal(this.id)">newgrounds</button>
+                    <button id="reddit" value="true" onclick="updateVal(this.id)">reddit</button>
+                    <button id="gdrive" value="true" onclick="updateVal(this.id)">google drive</button>
+                    <button id="meganz" value="true" onclick="updateVal(this.id)">mega.nz</button>
+                    <button id="rumble" value="true" onclick="updateVal(this.id)">rumble</button>
+                    <button id="soundcloud" value="true" onclick="updateVal(this.id)">soundcloud</button>
+                </div>
+                <div id="lang" class="gallery closed">
+                    <button id="eng" value="true" onclick="updateVal(this.id)">english</button>
+                </div>
+            </div>
+        </div>
+        <script src="/advanced/index.js"></script>
+    </body>
+</html>
