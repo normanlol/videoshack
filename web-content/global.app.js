@@ -9,5 +9,9 @@ if (document.getElementById("q")) {
 }
 
 function search() {
-    window.open("/search?q=" + encodeURIComponent(document.getElementById("q").value), "_self")
+    if (window.location.search.split("&")[1] !== undefined) {
+        window.open("/search?q=" + encodeURIComponent(document.getElementById("q").value) + "&" + window.location.search.split("&").slice(1).join("&"), "_self");
+    } else {
+        window.open("/search?q=" + encodeURIComponent(document.getElementById("q").value), "_self");
+    }
 }

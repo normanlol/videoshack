@@ -677,6 +677,69 @@ async function hostServer(request, response) {
                     });
                     response.end(errObj);
                 })
+            } else if (pathP[2] == "niconico") {
+                got("https://www.nicovideo.jp/search/" + u.query.q, {
+                    headers: {
+                        "Host": "www.nicovideo.jp",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "DNT": "1",
+                        "Connection": "keep-alive",
+                        "Upgrade-Insecure-Requests": "1",
+                        "Sec-GPC": "1"
+                    }
+                }).then(function(resp) {
+                    var $ = cheerio.load(resp.body);
+                    var final = [];
+                    for (var c in $(".list .item")) {
+                        if (
+                            $(".list .item .itemTitle a")[c] !== undefined &&
+                            $(".list .item .itemTitle a")[c].children !== undefined &&
+                            $(".list .item .itemTitle a")[c].children[0] !== undefined && 
+                            $(".list .item .itemTitle a")[c].children[0].data !== undefined &&
+                            $(".list .item .itemTitle a")[c].children[0].data !== "!DOCTYPE html"
+                        ) {
+                            var t = $(".list .item .itemTitle a")[c].children[0].data;
+                            var ur =  $(".list .item .itemTitle a")[c].attribs.href;
+                            // removes trending videos & non-search items
+                            if (ur.substring(0,1) == "/" && !ur.includes("?")) {
+                                var blob = {
+                                    "title": t,
+                                    "url": "https://www.nicovideo.jp" + ur,
+                                    "thumbnail": null,
+                                    "creatorName":null,
+                                    "creatorUrl": null
+                                }
+                                final.push(blob);
+                            }
+                        } else {
+                            continue;
+                        }
+                    }
+                    var json = JSON.stringify({
+                        "query": u.query.q,
+                        "results": final
+                    })
+                    response.writeHead(200, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
             } else {
                 var errObj = JSON.stringify({
                     "err": {

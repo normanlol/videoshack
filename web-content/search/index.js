@@ -37,6 +37,10 @@ function runSearch() {
             "safeName":"BiliBili"
         },
         {
+            "apiName":"niconico",
+            "safeName":"NicoNico"
+        },
+        {
             "apiName":"metacafe",
             "safeName":"Metacafe"
         },
@@ -123,9 +127,13 @@ function runSearch() {
                 auth.innerHTML = "by " + json.results[c].creatorName + " from " + scrapers[index].safeName;
                 authLink.appendChild(auth);
                 d.appendChild(authLink);
-            } else {
+            } else if (json.results[c].creatorName) {
                 var auth = document.createElement("H3");
                 auth.innerHTML = "by " + json.results[c].creatorName + " from " + scrapers[index].safeName;
+                d.appendChild(auth);
+            } else {
+                var auth = document.createElement("H3");
+                auth.innerHTML = "by <i>Unknown</i> from " + scrapers[index].safeName;
                 d.appendChild(auth);
             }
             div.appendChild(d);

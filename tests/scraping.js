@@ -244,9 +244,30 @@ redddit.search("site:drive.google.com test", function(err, resp) {
     }
 })
 
+// soundcloud search
 scSearch.init("38kZjAWhqvwrcMFKFo3496SY4OsSovTU");
 scSearch.getTracks("test", 100).then(function(resp) {
     console.log("[+] soundcloud search successfully executed (" + resp.length + " items found)");
 }).catch(function(err) {
     console.log("[!] soundcloud search failed (" + err.message + ")");
+})
+
+// niconico search
+got("https://www.nicovideo.jp/search/test", {
+    headers: {
+        "Host": "www.nicovideo.jp",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-GPC": "1"
+    }
+}).then(function(resp) {
+    var $ = cheerio.load(resp.body);
+    console.log("[+] niconico search successfully executed (" + $(".list .item").length + " items found)");
+}).catch(function(err) {
+    console.log("[!] niconico search failed (" + err.message + ")");
 })
