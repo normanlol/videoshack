@@ -7,6 +7,8 @@ You can host your own instance in a couple easy steps [here](./documentation/ins
 
 [VideoShack Official Instance](https://videoshack.org) - Hosted by [electrohaxz.tk](https://host.electrohaxz.tk)
 
+[Alternative Instance](https://videoshack.herokuapp.com) - Hosted on [Heroku's servers](https://heroku.com)
+
 ## Sites Supported
 - YouTube
 - Vimeo
