@@ -4,7 +4,8 @@
   "description": "video meta search engine",
   "main": "index.js",
   "scripts": {
-    "test": "node test/scraping.js"
+    "test": "node test/scraping.js",
+    "start": "node index"
   },
   "repository": {
     "type": "git",
