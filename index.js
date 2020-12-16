@@ -699,16 +699,19 @@ async function hostServer(request, response) {
                             $(".list .item .itemTitle a")[c].children !== undefined &&
                             $(".list .item .itemTitle a")[c].children[0] !== undefined && 
                             $(".list .item .itemTitle a")[c].children[0].data !== undefined &&
-                            $(".list .item .itemTitle a")[c].children[0].data !== "!DOCTYPE html"
+                            $(".list .item .itemTitle a")[c].children[0].data !== "!DOCTYPE html" &&
+                            $(".list .item .jsLazyImage")[c] !== undefined
                         ) {
                             var t = $(".list .item .itemTitle a")[c].children[0].data;
                             var ur =  $(".list .item .itemTitle a")[c].attribs.href;
+                            var thumb = $(".list .item .jsLazyImage")[c].attribs["data-original"] || $(".list .item .jsLazyImage")[c].attribs["data-thumbnail"];
+                            if (thumb == undefined) {var thumb = null;}
                             // removes trending videos & non-search items
                             if (ur.substring(0,1) == "/" && !ur.includes("?")) {
                                 var blob = {
                                     "title": t,
                                     "url": "https://www.nicovideo.jp" + ur,
-                                    "thumbnail": null,
+                                    "thumbnail": thumb,
                                     "creatorName":null,
                                     "creatorUrl": null
                                 }
