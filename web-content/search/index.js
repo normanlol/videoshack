@@ -57,6 +57,10 @@ function runSearch() {
             "safeName":"Rumble"
         },
         {
+            "apiName":"tumblr",
+            "safeName":"Tumblr"
+        },
+        {
             "apiName":"reddit",
             "safeName":"Reddit"
         },

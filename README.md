@@ -34,6 +34,7 @@ You can host your own instance in a couple easy steps [here](./documentation/ins
 - VEOH
 - TikTok
 - QQ.com
+- rutube.ru
 
 ## Features
 - Free, open sourced, public domain code

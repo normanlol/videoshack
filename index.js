@@ -23,10 +23,10 @@ async function hostServer(request, response) {
                     for (var c in resp.items) {if (resp.items[c].type == "video") {
                         var newObj = {
                             "title": resp.items[c].title,
-                            "url": resp.items[c].link,
+                            "url": resp.items[c].url,
                             "thumbnail": resp.items[c].bestThumbnail.url.split("?")[0],
                             "creatorName": resp.items[c].author.name,
-                            "creatorUrl": resp.items[c].author.ref
+                            "creatorUrl": resp.items[c].author.url
                         }
                         final.push(newObj)
                     } else {continue;}}
@@ -419,7 +419,7 @@ async function hostServer(request, response) {
                         else if ($(".itemlist li a")[c].attribs.href.substring(0,1) == "/") {continue;}
                         var ur = $(".itemlist li a")[c].attribs.href;
                         var th = $(".itemlist li a .item-icon div img")[c].attribs.src.split("?")[0];
-                        var t = extractQQTitle($(".itemlist li a .detail-title h4")[c]).replace(/^\s+|\s+$/g, "");
+                        var t = extractQQTitle($(".itemlist li a .detail-title h4")[c]);
                         var au = $(".itemlist li a .detail-title span strong")[c].children[0].data;
                         var auL = null;
                         var blob = {
@@ -743,6 +743,109 @@ async function hostServer(request, response) {
                     });
                     response.end(errObj);
                 })
+
+            } else if (pathP[2] == "tumblr") {
+                got("https://www.tumblr.com/search/" + u.query.q, {
+                    headers: {
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept-Language": "en-US,en;q=0.9",
+                        "Upgrade-Insecure-Requests": "1",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36"
+                    }
+                }).then(function(resp) {
+                    var cookies = resp.headers["set-cookie"];
+                    var cString = "";
+                    var $ = cheerio.load(resp.body);
+                    var key = $("#tumblr_form_key")[0].attribs.content;
+                    for (var c in cookies) { cString = cString + cookies[c].split(";")[0] + "; " }
+                    cString = cString.substring(0, cString.length - 2);
+                    var b = "q=" + u.query.q + "&sort=top&post_view=masonry&blogs_before=-1&num_blogs_shown=4&num_posts_shown=0&before=0&blog_page=2&safe_mode=true&post_page=1&filter_nsfw=true&filter_post_type=video&next_ad_offset=0&ad_placement_id=0&more_posts=true";
+                    var l = (encodeURI(b).split(/%..|./).length - 1);
+                    got.post("https://www.tumblr.com/search/" + u.query.q, {
+                        body: b,
+                        headers: {
+                            "accept": "application/json, text/javascript, */*; q=0.01",
+                            "accept-encoding": "gzip, deflate, br",
+                            "accept-language": "en-US,en;q=0.9",
+                            "content-length": l,
+                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                            "Cookie": cString,
+                            "Origin": "https://www.tumblr.com",
+                            "Referer": "https://www.tumblr.com/search/" + u.query.q,
+                            "sec-fetch-dest": "empty",
+                            "sec-fetch-mode": "cors",
+                            "sec-fetch-site": "same-origin",
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36",
+                            "x-requested-with": "XMLHttpRequest",
+                            "x-tumblr-form-key": key
+                        }
+                    }).then(function(resp) {
+                        var j = JSON.parse(resp.body);
+                        var $ = cheerio.load(j.response.posts_html);
+                        var final = [];
+                        for (var c in $("article .post_content .video_embed")) {
+                            if ($("article .post_content .post_body")[c]) {
+                                if (extractQQTitle($("article .post_content .post_body")[c].children) !== undefined) {
+                                    var tit = extractQQTitle($("article .post_content .post_body")[c].children);
+                                    if ($("article .post_content video")[c] && $("article .post_content video")[c].attribs !== undefined) {
+                                        var thumb = $("article .post_content video")[c].attribs.poster;
+                                    } else {
+                                        var thumb = null;
+                                    }
+                                    if ($("article .post-info-tumblelogs a")[c] == undefined | $("article .post-info-tumblelogs a")[c].attribs == undefined) {continue;}
+                                    var lnk = $("article .post-info-tumblelogs a")[c].attribs.href;
+                                    if (lnk.substring(0,1) == "/") {continue;}
+                                    var authLink = lnk.split("/post/")[0];
+                                    var auth = extractQQTitle($("article .post-info-tumblelogs a")[c].children);
+                                    var blob = {
+                                        "title": tit,
+                                        "url": lnk,
+                                        "creatorUrl": authLink,
+                                        "creatorName": auth,
+                                        "thumbnail": thumb
+                                    }
+                                    final.push(blob);
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                        var json = JSON.stringify({
+                            "query": u.query.q,
+                            "results": final
+                        })
+                        response.writeHead(200, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(json);
+                    }).catch(function(err) { 
+                        var errObj = JSON.stringify({
+                            "err": {
+                                "message": err.message,
+                                "code": err.code
+                            }
+                        });
+                        response.writeHead(500, {
+                            "Access-Control-Allow-Origin": "*",
+                            "Content-Type": "application/json"
+                        });
+                        response.end(errObj);
+                    })
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
+                })
             } else {
                 var errObj = JSON.stringify({
                     "err": {
@@ -774,7 +877,7 @@ async function hostServer(request, response) {
         got(ur, {
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept": "image/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
                 "DNT": "1",
@@ -924,14 +1027,18 @@ function extractQQTitle(cs) {
         for (var c in cs) {
             if (cs[c].type == "text") {
                 var result = result + cs[c].data;
-            } else if (cs[c].type == "tag") {
-                if (cs[c].name == "mark") {
-                    for (var cc in cs[c].children) {
+            } else {
+                for (var cc in cs[c].children) {
+                    if (cs[c].children[cc].data) {
                         var result = result + cs[c].children[cc].data;
+                    } else if (cs[c].children[cc].children[0] !== undefined) {
+                        var result = result + cs[c].children[cc].children[0].data;
+                    } else {
+                        var result = result + "";
                     }
                 }
             }
         }
-        return result;
+        return result.replace(/^\s+|\s+$/g, "");;
     }
 }
