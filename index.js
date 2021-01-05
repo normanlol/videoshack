@@ -709,7 +709,6 @@ async function hostServer(request, response) {
                             var ur =  $(".list .item .itemTitle a")[c].attribs.href;
                             var thumb = $(".list .item .jsLazyImage")[c].attribs["data-original"] || $(".list .item .jsLazyImage")[c].attribs["data-thumbnail"];
                             if (thumb == undefined) {var thumb = null;}
-                            // removes trending videos & non-search items
                             if (ur.substring(0,1) == "/" && !ur.includes("?")) {
                                 var blob = {
                                     "title": t,
