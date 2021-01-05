@@ -24,10 +24,10 @@
   },
   "homepage": "https://github.com/normanlol/videoshack#readme",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
-    "got": "^11.8.0",
+    "cheerio": "^1.0.0-rc.5",
+    "got": "^11.8.1",
     "redddit": "^1.1.0",
     "sc-searcher": "^1.0.5",
-    "ytsr": "^2.0.0-alpha.4"
+    "ytsr": "^2.0.2"
   }
 }
