@@ -293,7 +293,7 @@ async function hostServer(request, response) {
                             $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0] !== undefined 
                         ) {
                             var tit = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0].data;
-                            if (tit == "!DOCTYPE html" | tit == undefined) {continue;} else {
+                            if (tit == "!DOCTYPE html" | tit == undefined | $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs == undefined) {continue;} else {
                                 var au = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].children[0].data ;
                                 var aul = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs.href;
                                 if (aul == "https://www.metacafe.com/login-required/") {continue;}
@@ -499,6 +499,18 @@ async function hostServer(request, response) {
                         "Content-Type": "application/json"
                     });
                     response.end(json);
+                }).catch(function(err) {
+                    var errObj = JSON.stringify({
+                        "err": {
+                            "message": err.message,
+                            "code": err.code
+                        }
+                    });
+                    response.writeHead(500, {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json"
+                    });
+                    response.end(errObj);
                 })
             } else if (pathP[2] == "reddit") {
                 redddit.search("site:v.redd.it " + u.query.q, function(err, resp) {
@@ -690,7 +702,8 @@ async function hostServer(request, response) {
                             $(".list .item .itemTitle a")[c].children[0] !== undefined && 
                             $(".list .item .itemTitle a")[c].children[0].data !== undefined &&
                             $(".list .item .itemTitle a")[c].children[0].data !== "!DOCTYPE html" &&
-                            $(".list .item .jsLazyImage")[c] !== undefined
+                            $(".list .item .jsLazyImage")[c] !== undefined &&
+                            $(".list .item .itemTitle a")[c].attribs !== undefined
                         ) {
                             var t = $(".list .item .itemTitle a")[c].children[0].data;
                             var ur =  $(".list .item .itemTitle a")[c].attribs.href;
@@ -733,7 +746,6 @@ async function hostServer(request, response) {
                     });
                     response.end(errObj);
                 })
-
             } else if (pathP[2] == "tumblr") {
                 got("https://www.tumblr.com/search/" + u.query.q, {
                     headers: {
