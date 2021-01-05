@@ -638,7 +638,7 @@ async function hostServer(request, response) {
                 })
             } else if (pathP[2] == "soundcloud") {
                 var final = [];
-                scSearch.init("38kZjAWhqvwrcMFKFo3496SY4OsSovTU");
+                scSearch.init("vAb6a1Ta53PoYqLYLaJjZTl5L9xGpyrh");
                 scSearch.getTracks(u.query.q, 100).then(function(resp) {
                     for (var c in resp) {
                         var t = resp[c].title;
