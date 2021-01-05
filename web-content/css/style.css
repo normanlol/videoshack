@@ -128,7 +128,7 @@ button[value="false"] {
     }
     .result div {
         padding-top:2%;
-        max-width:62.5%;
+        width:62.5%;
     }
     .result div * {
         margin:0;
