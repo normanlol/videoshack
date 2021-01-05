@@ -474,10 +474,12 @@ async function hostServer(request, response) {
                         else if ($(".video-listing-entry article h3")[c].children == undefined) {continue;} 
                         else if ($(".video-listing-entry article h3")[c].children[0] == undefined) {continue;}
                         else if ($(".video-listing-entry article h3")[c].children[0].data == "!DOCTYPE html") {continue;}
+                        else if ($(".video-listing-entry article .video-item--a")[c].attribs == undefined) {continue;}
                         var t = $(".video-listing-entry article h3")[c].children[0].data;
-                        var th = $(".video-listing-entry article .video-item--a img")[c].attribs.src;
+                        if ($(".video-listing-entry article .video-item--a img")[c].attribs == undefined) {var th = null}
+                        else {var th = $(".video-listing-entry article .video-item--a img")[c].attribs.src;}
                         var au = $(".video-listing-entry article footer address a .ellipsis-1")[c].children[0].data;
-                        var auL = "https://rumble.com" + $(".video-listing-entry article footer address a")[c].attribs.href;
+                        var auL = "https://rumble.com" + $(".video-listing-entry .video-item--by-a")[c].attribs.href;
                         var ur = "https://rumble.com" + $(".video-listing-entry article .video-item--a")[c].attribs.href;
                         var blob = {
                             "title": t,
@@ -497,18 +499,6 @@ async function hostServer(request, response) {
                         "Content-Type": "application/json"
                     });
                     response.end(json);
-                }).catch(function(err) {
-                    var errObj = JSON.stringify({
-                        "err": {
-                            "message": err.message,
-                            "code": err.code
-                        }
-                    });
-                    response.writeHead(500, {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type": "application/json"
-                    });
-                    response.end(errObj);
                 })
             } else if (pathP[2] == "reddit") {
                 redddit.search("site:v.redd.it " + u.query.q, function(err, resp) {
