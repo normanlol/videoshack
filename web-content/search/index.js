@@ -103,6 +103,7 @@ function runSearch() {
             return;
         }
         for (var c in json.results) {
+            if (!json.results[c].title.toLowerCase().includes(decodeURIComponent(query).toLowerCase())) {continue;}
             var a = document.createElement("A");
             a.href = json.results[c].url;
             var div = document.createElement("DIV");

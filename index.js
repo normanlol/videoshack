@@ -7,6 +7,12 @@ const got = require("got");
 const redddit = require("redddit");
 const sc = require("sc-searcher");
 const scSearch = new sc();
+const scKey = require("soundcloud-key-fetch");
+scKey.fetchKey().then(function(key) {
+    scKey.testKey(key).then(function(valid) {
+        if (valid) { scSearch.init(key); }
+    }) 
+});
 const port = process.env.PORT || 8228
 
 http.createServer(hostServer).listen(port);
@@ -640,7 +646,6 @@ async function hostServer(request, response) {
                 })
             } else if (pathP[2] == "soundcloud") {
                 var final = [];
-                scSearch.init("vAb6a1Ta53PoYqLYLaJjZTl5L9xGpyrh");
                 scSearch.getTracks(u.query.q, 100).then(function(resp) {
                     for (var c in resp) {
                         var t = resp[c].title;
