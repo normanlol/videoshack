@@ -425,7 +425,7 @@ async function hostServer(request, response) {
                         else if ($(".itemlist li a")[c].attribs.href.substring(0,1) == "/") {continue;}
                         var ur = $(".itemlist li a")[c].attribs.href;
                         var th = $(".itemlist li a .item-icon div img")[c].attribs.src.split("?")[0];
-                        var t = extractQQTitle($(".itemlist li a .detail-title h4")[c]);
+                        var t = extractQQTitle($(".itemlist li a .detail-title h4")[c].children);
                         var au = $(".itemlist li a .detail-title span strong")[c].children[0].data;
                         var auL = null;
                         var blob = {
@@ -1027,24 +1027,22 @@ async function hostServer(request, response) {
 }
 
 
-function extractQQTitle(cs) {
-    for (var c in cs) {
-        var result = "";
-        for (var c in cs) {
-            if (cs[c].type == "text") {
-                var result = result + cs[c].data;
-            } else {
-                for (var cc in cs[c].children) {
-                    if (cs[c].children[cc].data) {
-                        var result = result + cs[c].children[cc].data;
-                    } else if (cs[c].children[cc].children[0] !== undefined) {
-                        var result = result + cs[c].children[cc].children[0].data;
-                    } else {
-                        var result = result + "";
-                    }
-                }
+function extractQQTitle(array) {
+    if (Object.prototype.toString.call(array) == "[object Array]") {
+        var string = "";
+        for (var c in array) {
+            if (array[c].type == "text") {string = string + array[c].data}
+            else if (
+                array[c].type == "tag" && 
+                array[c].children !== undefined && 
+                array[c].children[0] !== undefined &&
+                array[c].children[0].type == "text"
+            ) {
+                string = string + array[c].children[0].data;
             }
         }
-        return result.replace(/^\s+|\s+$/g, "");;
+        return string.replace(/^\s+|\s+$/g, "");;
+    } else {
+        return array;
     }
 }

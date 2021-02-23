@@ -122,7 +122,8 @@ function runSearch() {
             }
             var d = document.createElement("DIV");
             var t = document.createElement("H2");
-            t.innerHTML = json.results[c].title;
+            if (json.results[c].title.length > 201) { var vidTit = json.results[c].title.substring(0,200) + "..."; } else { var vidTit = json.results[c].title; }
+            t.innerHTML = vidTit;
             d.appendChild(t);
             if (json.results[c].creatorUrl && json.results[c].creatorUrl !== null) {
                 var authLink = document.createElement("A");
