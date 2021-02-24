@@ -145,7 +145,7 @@ function runSearch() {
             a.appendChild(div);
             document.getElementById("resultsContainer").appendChild(a);
         }
-        document.getElementById("resultCount").innerHTML = document.querySelectorAll("#resultsContainer div").length.toLocaleString() + " videos found so far...";
+        document.getElementById("resultCount").innerHTML = document.querySelectorAll("#resultsContainer .result").length.toLocaleString() + " videos found so far...";
         var nIndex = index + 1;
         localStorage.setItem("index", nIndex.toString());
         runSearch();
