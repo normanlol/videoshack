@@ -81,7 +81,7 @@ function runSearch() {
     var query = window.location.search.substring(3).split("&")[0];
     if (scrapers[index] == undefined) {
         document.getElementById("s").innerHTML = "finished searching!"
-        document.getElementById("resultCount").innerHTML = document.querySelectorAll("#resultsContainer a").length.toLocaleString() + " videos found.";
+        document.getElementById("resultCount").innerHTML = document.querySelectorAll("#resultsContainer .result").length.toLocaleString() + " videos found.";
         return;
     }
     if (isIgnored(scrapers[index].apiName) == true) {

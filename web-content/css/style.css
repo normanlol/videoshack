@@ -68,11 +68,16 @@ button[value="false"] {
     border:0;
 }
 
+.header a {
+    min-width:120px;
+}
+
 @media (max-width:1200px) {
     .p {
         width:100%;
         text-align:center;
     }
+
     .p h1 {
         font-size:120px;
         margin:0;
@@ -82,32 +87,40 @@ button[value="false"] {
         margin:0;
         width:100%;
     }
+
     .p input {
         width:50%;
         height:28px;
         margin-bottom:30px;
     }
+
     .header {
         text-align:center;
     }
+
     .header h1 {
         color:white;
         text-decoration:none;
     }
+
     .header input {
         width:80%;
         height:26px;
     }
+
     .header button {
         margin-top:3%;
     }
+
     .results {
         margin-top:3%;
     }
+
     #loader, .result {
         margin-left:1%;
         margin-right:1%;
     }
+
     .result {
         background:black;
         width:98%;
@@ -115,9 +128,11 @@ button[value="false"] {
         margin-bottom:10px;
         overflow-wrap:break-word;
     }
+
     .result img, .result div {
         float:left;
     }
+
     .result img {
         padding-top:2%;
         padding-left:1%;
@@ -126,10 +141,12 @@ button[value="false"] {
         height:80%;
         object-fit:cover;
     }
+
     .result div {
         padding-top:2%;
         width:62.5%;
     }
+
     .result div * {
         margin:0;
         color:white;
@@ -144,28 +161,34 @@ button[value="false"] {
         margin:0;
         width:99%;
     }
+
     .p h2 {
         font-size:64px;
         margin:0;
         width:100%;
     }
+
     .p input {
         width:99%;
         height:26px;
         margin-bottom:2.5%;
     }
+
     .header {
         padding-left:2.25%;
         padding-top:2%;
     }
+
     .header * {
         float:left;
     }
+
     .header h1 {
         color:white;
         text-decoration:none;
         margin:0;
     }
+
     .header input {
         height:28px;
         width:50%;
@@ -174,16 +197,19 @@ button[value="false"] {
         padding-top:0;
         padding-bottom:0;
     }
+
     .header button {
-        margin-top:4px;
+        margin-top:3px;
         margin-left:1%;
         height:32px;
     }
+
     .results {
         margin-left:2.25%;
         width:96%;
         margin-top:4%;
     }
+
     .result {
         background:black;
         color:white;
@@ -191,9 +217,11 @@ button[value="false"] {
         width:100%;
         margin-bottom:1%;
     }
+
     .result img, .result div {
         float:left;
     }
+
     .result img {
         object-fit:cover;
         width:25%;
@@ -202,23 +230,28 @@ button[value="false"] {
         padding-right:1%;
         height:90%;
     }
+
     .result div {
         padding-top:1%;
         width:70%;
         overflow-wrap:break-word;
     }
+
     .result div * {
         padding-bottom:5px;
         color:white;
         margin:0;
     }
+
     #s {
         margin-top:0;
         margin-bottom:5px;
     }
+
     #resultCount {
         margin:0;
     }
+
     #loader {
         margin-bottom:1%;
     }

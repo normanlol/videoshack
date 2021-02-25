@@ -29,6 +29,6 @@
     "redddit": "^1.1.0",
     "sc-searcher": "^1.0.5",
     "soundcloud-key-fetch": "^1.0.11",
-    "ytsr": "^3.2.4"
+    "ytsr": "^3.3.1"
   }
 }

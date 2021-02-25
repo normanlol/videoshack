@@ -23,13 +23,13 @@ You can host your own instance in a couple easy steps [here](./documentation/ins
 - Google Drive & MEGA (via Reddit)
 - Rumble
 - Soundcloud
+- Tumblr
 
 ### To Be Supported
 - Twitter
 - Dumpert.nl
 - Facebook
 - OK.RU
-- Tumblr
 - VK
 - VEOH
 - TikTok
