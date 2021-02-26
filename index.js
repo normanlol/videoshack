@@ -914,32 +914,31 @@ async function hostServer(request, response) {
                                 "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
                                 "Cookie": cString,
                                 "Origin": "https://www.tumblr.com",
-                                "Referer": "https://www.tumblr.com/search/" + u.query.q,
+                                "Referer": "https://www.tumblr.com/search/" + encodeURIComponent(u.query.q),
                                 "sec-fetch-dest": "empty",
                                 "sec-fetch-mode": "cors",
                                 "sec-fetch-site": "same-origin",
-                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36",
+                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0",
                                 "x-requested-with": "XMLHttpRequest",
                                 "x-tumblr-form-key": key
                             }
                         }).then(function(resp) {
-                            if (resp.body == "" || !resp.body) {
+                            var j = JSON.parse(resp.body);
+                            if (!j.response.posts_html || j.response.posts_html) {
                                 var errObj = JSON.stringify({
                                     "err": {
-                                        "message": "Unable to parse due to empty body.",
-                                        "code": "noBody"
+                                        "message": "An empty body was given.",
+                                        "code": "emptyBody"
                                     }
-                                });
-                                response.writeHead(500, {
+                                })
+                                response.writeHead(404, {
                                     "Access-Control-Allow-Origin": "*",
                                     "Content-Type": "application/json"
                                 });
                                 response.end(errObj);
                                 return;
                             }
-                            var j = JSON.parse(resp.body);
                             var $ = cheerio.load(j.response.posts_html);
-                            fs.writeFileSync("tumblr.html", j.response.posts_html)
                             var final = [];
                             for (var c in $("article .post_content")) {
                                 if (
