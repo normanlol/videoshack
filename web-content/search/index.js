@@ -153,8 +153,12 @@ function runSearch() {
             }
             if (json.results[c].desc !== undefined && json.results[c].desc !== null) {
                 var de = document.createElement("P");
-                de.innerHTML = escapeHtml(json.results[c].desc);
-                d.appendChild(de);
+                if (json.results[c].desc.length > 201) {
+                    var desc = json.results[c].desc.substring(0, 200);
+                } else {
+                    var desc = json.results[c].desc;
+                }
+                de.innerHTML = escapeHtml(desc);
             }
             div.appendChild(d);
             a.appendChild(div);

@@ -73,8 +73,7 @@ button[value="false"] {
 }
 
 .result p {
-    max-height:154px;
-    overflow-y:scroll;
+    overflow:hidden !important;
 }
 
 @media (max-width:1200px) {
