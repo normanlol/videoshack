@@ -106,8 +106,8 @@ function runSearch() {
             var a = document.createElement("A");
             a.href = json.results[c].url;
             var div = document.createElement("DIV");
-            div.classList.add("result")
-            if (json.results[c].thumbnail) {
+            div.classList.add("result");
+            if (json.results[c].thumbnail !== undefined || json.results[c].thumbnail !== null) {
                 var img = document.createElement("IMG");
                 img.src = "/proxy/" + btoa(json.results[c].thumbnail);
                 img.onerror = function () {
@@ -140,6 +140,21 @@ function runSearch() {
                 var auth = document.createElement("H3");
                 auth.innerHTML = "by <i>Unknown</i> from " + scrapers[index].safeName;
                 d.appendChild(auth);
+            }
+            if (json.results[c].uploadedAt !== undefined && json.results[c].uploadedAt !== null) {
+                var u = document.createElement("H4");
+                u.innerHTML = "Uploaded " + json.results[c].uploadedAt;
+                d.appendChild(u); 
+            }
+            if (json.results[c].viewCount !== undefined && json.results[c].viewCount !== null) {
+                var v = document.createElement("H4");
+                v.innerHTML = json.results[c].viewCount.toLocaleString() + " views";
+                d.appendChild(v); 
+            }
+            if (json.results[c].desc !== undefined && json.results[c].desc !== null) {
+                var de = document.createElement("P");
+                de.innerHTML = json.results[c].desc;
+                d.appendChild(de);
             }
             div.appendChild(d);
             a.appendChild(div);

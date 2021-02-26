@@ -33,9 +33,12 @@ async function hostServer(request, response) {
                                 "url": resp.items[c].url,
                                 "thumbnail": resp.items[c].bestThumbnail.url.split("?")[0],
                                 "creatorName": resp.items[c].author.name,
-                                "creatorUrl": resp.items[c].author.url
+                                "creatorUrl": resp.items[c].author.url,
+                                "uploadedAt": resp.items[c].uploadedAt,
+                                "viewCount": resp.items[c].views,
+                                "desc": resp.items[c].description
                             }
-                            final.push(newObj)
+                            final.push(newObj);
                         } else {continue;}}
                         var json = JSON.stringify({
                             "query": u.query.q,
@@ -87,7 +90,10 @@ async function hostServer(request, response) {
                                         "url": json.filtered.data[c].clip.link,
                                         "thumbnail": json.filtered.data[c].clip.pictures.sizes[0].link,
                                         "creatorName": json.filtered.data[c].clip.user.name,
-                                        "creatorUrl": json.filtered.data[c].clip.user.link
+                                        "creatorUrl": json.filtered.data[c].clip.user.link,
+                                        "uploadedAt": json.filtered.data[c].clip.created_time,
+                                        "viewCount": json.filtered.data[c].clip.stats.plays,
+                                        "desc": null
                                     }
                                     final.push(newObj);
                                 }
@@ -130,16 +136,19 @@ async function hostServer(request, response) {
                 return;
 
                 case "dailymotion":
-                    got("https://api.dailymotion.com/videos?fields=id,thumbnail_url%2Ctitle&search=" + encodeURIComponent(u.query.q) + "&limit=100").then(function(resp) {
+                    got("https://api.dailymotion.com/videos?fields=url,thumbnail_url,title,description,views_total&search=" + encodeURIComponent(u.query.q) + "&limit=100").then(function(resp) {
                         var json = JSON.parse(resp.body);
                         var final = [];
                         for (var c in json.list) {
                             var newObj = {
                                 "title": json.list[c].title,
-                                "url": "https://dailymotion.com/video/" + json.list[c].id,
+                                "url": json.list[c].url,
                                 "thumbnail": json.list[c].thumbnail_url,
                                 "creatorName": null,
-                                "creatorUrl": null
+                                "creatorUrl": null,
+                                "uploadedAt": null,
+                                "viewCount": json.list[c].views_total,
+                                "desc": json.list[c].description
                             }
                             final.push(newObj);
                         }
@@ -225,7 +234,10 @@ async function hostServer(request, response) {
                                         "url": "https://www.bitchute.com" + json[c].path,
                                         "thumbnail": json[c].images.thumbnail,
                                         "creatorName": json[c].channel_name,
-                                        "creatorUrl": "https://www.bitchute.com" + json[c].channel_path
+                                        "creatorUrl": "https://www.bitchute.com" + json[c].channel_path,
+                                        "uploadedAt": null,
+                                        "viewCount": json[c].views,
+                                        "desc": json[c].description
                                     }
                                     final.push(newObj);
                                 }
@@ -286,27 +298,36 @@ async function hostServer(request, response) {
                         for (var c in $("#search_videos_videos_list_search_result .item")) {
                             if (
                                 $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children !== undefined &&
-                                $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0] !== undefined 
+                                $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0] !== undefined &&
+                                $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0].data !== "!DOCTYPE html" &&
+                                $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0].data !== undefined &&
+                                $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs !== undefined &&
+                                $("#search_videos_videos_list_search_result .item .mc-preview-views span")[c] !== undefined &&
+                                $("#search_videos_videos_list_search_result .item .mc-preview-views span")[c].children !== undefined
                             ) {
                                 var tit = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].children[0].data;
-                                if (tit == "!DOCTYPE html" | tit == undefined | $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs == undefined) {continue;} else {
-                                    var au = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].children[0].data ;
-                                    var aul = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs.href;
-                                    if (aul == "https://www.metacafe.com/login-required/") {continue;}
-                                    var ur = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].attribs.href;
-                                    if ($("#search_videos_videos_list_search_result .item .mc-new-item-image img")[c] == undefined) {var th = null;} else {
-                                        var th = JSON.stringify($("#search_videos_videos_list_search_result .item .mc-new-item-image img")[c].attribs.onscreenover.split("selectImgSrc(this, ")[1].split(")")[0])
-                                        var th = th.split("src: '")[1].split("'}")[0]
-                                    }
-                                    var blob = {
-                                        "title": tit,
-                                        "url": ur,
-                                        "thumbnail": th,
-                                        "creatorName": au,
-                                        "creatorUrl": aul
-                                    };
-                                    final.push(blob);
+                                var au = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].children[0].data;
+                                var aul = $("#search_videos_videos_list_search_result .mc-preview-link a")[c].attribs.href;
+                                if (aul == "https://www.metacafe.com/login-required/") {continue;}
+                                var ur = $("#search_videos_videos_list_search_result .item .mc-preview-title a")[c].attribs.href;
+                                var v = parseInt($("#search_videos_videos_list_search_result .item .mc-preview-views span")[c].children[0].data);
+                                var up = extractQQTitle($("#search_videos_videos_list_search_result .item .mc-preview-date")[c].children);
+                                var d = extractQQTitle($("#search_videos_videos_list_search_result .item .mc-preview-description")[c].children);
+                                if ($("#search_videos_videos_list_search_result .item .mc-new-item-image img")[c] == undefined) {var th = null;} else {
+                                    var th = JSON.stringify($("#search_videos_videos_list_search_result .item .mc-new-item-image img")[c].attribs.onscreenover.split("selectImgSrc(this, ")[1].split(")")[0])
+                                    var th = th.split("src: '")[1].split("'}")[0]
                                 }
+                                var blob = {
+                                    "title": tit,
+                                    "url": ur,
+                                    "thumbnail": th,
+                                    "creatorName": au,
+                                    "creatorUrl": aul,
+                                    "uploadedAt": up,
+                                    "viewCount": v,
+                                    "desc": d
+                                };
+                                final.push(blob);
                             }
                         }
                         var json = JSON.stringify({
@@ -330,7 +351,7 @@ async function hostServer(request, response) {
                             "Content-Type": "application/json"
                         });
                         response.end(errObj);
-                    })
+                    });
                 return;
 
                 case "archiveorg": 
@@ -360,14 +381,18 @@ async function hostServer(request, response) {
                                 var t = t.replace(/^\s+|\s+$/g, "");
                                 if ($(".results .item-ia .C234 .by .byv")[c] == undefined) {continue;}
                                 var auth = $(".results .item-ia .C234 .by .byv")[c].children[0].data;
-                                var authL = null;
-                                var th = "https://archive.org" + $(".results .item-ia .C234 .C2 img")[c].attribs.source
+                                var th = "https://archive.org" + $(".results .item-ia .C234 .C2 img")[c].attribs.source;
+                                var up = $(".results .item-ia .pubdate .hidden-xs")[c].children[0].data;
+                                var vc = parseInt($(".results .item-ia .views .hidden-xs")[c].children[0].data);
                                 var blob = {
                                     "title": t,
                                     "url": ur,
                                     "thumbnail": th,
                                     "creatorName": auth,
-                                    "creatorUrl": authL
+                                    "creatorUrl": null,
+                                    "uploadedAt": up,
+                                    "viewCount": vc,
+                                    "desc": null
                                 };
                                 final.push(blob);
                             }
@@ -393,7 +418,7 @@ async function hostServer(request, response) {
                             "Content-Type": "application/json"
                         });
                         response.end(errObj);
-                    })
+                    });
                 return;
 
                 case "bilibili":
@@ -413,18 +438,26 @@ async function hostServer(request, response) {
                         var $ = cheerio.load(resp.body);
                         var final = [];
                         for (var c in $(".video-list li")) {
-                            if ($(".video-list li .img-anchor")[c].attribs !== undefined && $(".video-list li .img-anchor")[c].attribs.title !== undefined) {
+                            if (
+                                $(".video-list li .img-anchor")[c].attribs !== undefined && 
+                                $(".video-list li .img-anchor")[c].attribs.title !== undefined
+                            ) {
                                 var t = $(".video-list li .img-anchor")[c].attribs.title;
                                 var th = $(".video-list li .img .lazy-img")[c].children[0].attribs.src;
                                 var a = $(".video-list li .up-name")[c].children[0].data;
-                                var aL = "https:" + $(".video-list li .up-name")[c].attribs.href.split("?")[0];
+                                var al = "https:" + $(".video-list li .up-name")[c].attribs.href.split("?")[0];
                                 var ur = "https:" + $(".video-list li .title")[c].attribs.href.split("?")[0];
+                                var up = extractQQTitle($(".video-list li .time")[c].children)
+                                var vc = extractQQTitle($(".video-list li .watch-num")[c].children).replace("万", "K");
                                 var blob = {
                                     "title": t,
                                     "url": ur,
                                     "thumbnail": th,
                                     "creatorName": a,
-                                    "creatorUrl": aL
+                                    "creatorUrl": al,
+                                    "uploadedAt": up,
+                                    "viewCount": vc,
+                                    "desc": null
                                 };
                                 final.push(blob);
                             }
@@ -468,23 +501,27 @@ async function hostServer(request, response) {
                         }
                     }).then(function(resp) {
                         var $ = cheerio.load(resp.body);
-                        var l = ($(".itemlist li").length - 1);
                         var final = [];
                         for (var c in $(".itemlist li")) {
-                            if ($(".itemlist li a")[c].attribs == undefined) {continue;}
-                            else if ($(".itemlist li a")[c].attribs.href == undefined) {continue;}
-                            else if ($(".itemlist li a")[c].attribs.href.substring(0,1) == "/") {continue;}
+                            if (
+                                $(".itemlist li a")[c].attribs == undefined ||
+                                $(".itemlist li a")[c].attribs.href == undefined || 
+                                $(".itemlist li a")[c].attribs.href.substring(0,1) == "/"
+                            ) {continue;}
                             var ur = $(".itemlist li a")[c].attribs.href;
                             var th = $(".itemlist li a .item-icon div img")[c].attribs.src.split("?")[0];
                             var t = extractQQTitle($(".itemlist li a .detail-title h4")[c].children);
                             var au = $(".itemlist li a .detail-title span strong")[c].children[0].data;
-                            var auL = null;
+                            var d = extractQQTitle($(".itemlist li a .detail-description")[c].children);
                             var blob = {
                                 "title": t,
                                 "url": ur,
                                 "thumbnail": th,
                                 "creatorName": au,
-                                "creatorUrl": auL
+                                "creatorUrl": null,
+                                "uploadedAt": null,
+                                "viewCount": null,
+                                "desc": d
                             };
                             final.push(blob);
                         }  
@@ -529,23 +566,32 @@ async function hostServer(request, response) {
                         var $ = cheerio.load(resp.body);
                         var final = [];
                         for (var c in $(".video-listing-entry")) {
-                            if ($(".video-listing-entry article h3")[c] == undefined) {continue;} 
-                            else if ($(".video-listing-entry article h3")[c].children == undefined) {continue;} 
-                            else if ($(".video-listing-entry article h3")[c].children[0] == undefined) {continue;}
-                            else if ($(".video-listing-entry article h3")[c].children[0].data == "!DOCTYPE html") {continue;}
-                            else if ($(".video-listing-entry article .video-item--a")[c].attribs == undefined) {continue;}
+                            if (
+                                $(".video-listing-entry article h3")[c] == undefined ||
+                                $(".video-listing-entry article h3")[c].children == undefined ||
+                                $(".video-listing-entry article h3")[c].children[0] == undefined ||
+                                $(".video-listing-entry article h3")[c].children[0].data == "!DOCTYPE html" ||
+                                $(".video-listing-entry article .video-item--a")[c].attribs == undefined ||
+                                $(".video-listing-entry article footer .video-item--rumbles")[c] == undefined ||
+                                $(".video-listing-entry article .video-item--time")[c] == undefined
+                            ) {continue;} 
                             var t = $(".video-listing-entry article h3")[c].children[0].data;
                             if ($(".video-listing-entry article .video-item--a img")[c].attribs == undefined) {var th = null}
                             else {var th = $(".video-listing-entry article .video-item--a img")[c].attribs.src;}
                             var au = $(".video-listing-entry article footer address a .ellipsis-1")[c].children[0].data;
                             var auL = "https://rumble.com" + $(".video-listing-entry .video-item--by-a")[c].attribs.href;
                             var ur = "https://rumble.com" + $(".video-listing-entry article .video-item--a")[c].attribs.href;
+                            var vc = parseInt($(".video-listing-entry article footer .video-item--rumbles")[c].attribs["data-value"].replace(",", ""));
+                            var up = $(".video-listing-entry article .video-item--time")[c].attribs["datetime"];
                             var blob = {
                                 "title": t,
                                 "url": ur,
                                 "thumbnail": th,
                                 "creatorName": au,
-                                "creatorUrl": auL
+                                "creatorUrl": auL,
+                                "uploadedAt": up,
+                                "viewCount": vc,
+                                "desc": null
                             };
                             final.push(blob);
                         }
@@ -594,13 +640,16 @@ async function hostServer(request, response) {
                                 var th = resp[c].data.thumbnail;
                                 var ur = resp[c].data.url_overridden_by_dest;
                                 var au = resp[c].data.author;
-                                var auL = "https://reddit.com/u/" + resp[c].data.author
+                                var auL = "https://reddit.com/u/" + resp[c].data.author;
                                 var blob = {
                                     "title": t,
                                     "url": ur,
                                     "thumbnail": th,
                                     "creatorName": au,
-                                    "creatorUrl": auL
+                                    "creatorUrl": auL,
+                                    "uploadedAt": null,
+                                    "viewCount": null,
+                                    "desc": null
                                 };
                                 final.push(blob);
                             }
@@ -644,7 +693,10 @@ async function hostServer(request, response) {
                                     "url": ur,
                                     "thumbnail": th,
                                     "creatorName": au,
-                                    "creatorUrl": auL
+                                    "creatorUrl": auL,
+                                    "uploadedAt": null,
+                                    "viewCount": null,
+                                    "desc": null
                                 };
                                 final.push(blob);
                             }
@@ -661,7 +713,7 @@ async function hostServer(request, response) {
                     });
                 return;
 
-                case "grdrive":
+                case "gdrive":
                     redddit.search("site:drive.google.com " + u.query.q, function(err, resp) {
                         if (err) {
                             var errObj = JSON.stringify({
@@ -688,7 +740,10 @@ async function hostServer(request, response) {
                                     "url": ur,
                                     "thumbnail": th,
                                     "creatorName": au,
-                                    "creatorUrl": auL
+                                    "creatorUrl": auL,
+                                    "uploadedAt": null,
+                                    "viewCount": null,
+                                    "desc": null
                                 };
                                 final.push(blob);
                             }
@@ -718,12 +773,18 @@ async function hostServer(request, response) {
                                 var au = resp[c].user.permalink;
                             }
                             var auL = resp[c].user.permalink_url;
+                            var vc = resp[c].playback_count;
+                            var up = resp[c].display_date;
+                            if (resp[c].description) {var d = resp[c].description.replace(/^\s+|\s+$/g, "");} else {var d = null;}
                             var blob = {
                                 "title": t,
                                 "url": ur,
                                 "thumbnail": th,
                                 "creatorName": au,
-                                "creatorUrl": auL
+                                "creatorUrl": auL,
+                                "uploadedAt": up,
+                                "viewCount": vc,
+                                "description": d
                             };
                             final.push(blob);
                         }
@@ -775,19 +836,25 @@ async function hostServer(request, response) {
                                 $(".list .item .itemTitle a")[c].children[0].data !== undefined &&
                                 $(".list .item .itemTitle a")[c].children[0].data !== "!DOCTYPE html" &&
                                 $(".list .item .jsLazyImage")[c] !== undefined &&
-                                $(".list .item .itemTitle a")[c].attribs !== undefined
+                                $(".list .item .itemTitle a")[c].attribs !== undefined &&
+                                $(".list .item .view span")[c] !== undefined &&
+                                $(".list .item .view span")[c].children !== undefined 
                             ) {
                                 var t = $(".list .item .itemTitle a")[c].children[0].data;
                                 var ur =  $(".list .item .itemTitle a")[c].attribs.href;
                                 var thumb = $(".list .item .jsLazyImage")[c].attribs["data-original"] || $(".list .item .jsLazyImage")[c].attribs["data-thumbnail"];
+                                var vc = parseInt(extractQQTitle($(".list .item .view span")[c].children).replace(",", ""));
                                 if (thumb == undefined) {var thumb = null;}
                                 if (ur.substring(0,1) == "/" && !ur.includes("?")) {
                                     var blob = {
                                         "title": t,
                                         "url": "https://www.nicovideo.jp" + ur,
                                         "thumbnail": thumb,
-                                        "creatorName":null,
-                                        "creatorUrl": null
+                                        "creatorName": null,
+                                        "creatorUrl": null,
+                                        "uploadedAt": null,
+                                        "viewCount": vc,
+                                        "desc": null
                                     }
                                     final.push(blob);
                                 }
@@ -858,6 +925,7 @@ async function hostServer(request, response) {
                         }).then(function(resp) {
                             var j = JSON.parse(resp.body);
                             var $ = cheerio.load(j.response.posts_html);
+                            fs.writeFileSync("tumblr.html", j.response.posts_html)
                             var final = [];
                             for (var c in $("article .post_content")) {
                                 if (
@@ -874,8 +942,11 @@ async function hostServer(request, response) {
                                     "title": t,
                                     "url": l,
                                     "thumbnail": null,
-                                    "creatorName":au,
-                                    "creatorUrl": al
+                                    "creatorName": au,
+                                    "creatorUrl": al,
+                                    "uploadedAt": null,
+                                    "viewCount": null,
+                                    "desc": null
                                 }
                                 final.push(blob);
                             }

@@ -30,11 +30,6 @@ html, body {
     text-decoration:underline;
 }
 
-.bottomHalf {
-    text-align:center;
-    margin:0;
-}
-
 .gallery {
     padding-top:1%;
     transition:width 0.5s, height 0.5s, opacity 0.5s;
@@ -70,6 +65,11 @@ button[value="false"] {
 
 .header a {
     min-width:120px;
+}
+
+.bottomHalf {
+    text-align:center;
+    margin:0;
 }
 
 @media (max-width:1200px) {
@@ -153,6 +153,11 @@ button[value="false"] {
         max-width:92%;
 	    overflow:auto;
     }
+
+    .bottomHalf {
+        text-align:center !important;
+    }
+
 }
 
 @media (min-width:1200px) {
