@@ -237,7 +237,7 @@ async function hostServer(request, response) {
                                         "creatorUrl": "https://www.bitchute.com" + json[c].channel_path,
                                         "uploadedAt": null,
                                         "viewCount": json[c].views,
-                                        "desc": json[c].description
+                                        "desc": extractQQTitle(json[c].description)
                                     }
                                     final.push(newObj);
                                 }
