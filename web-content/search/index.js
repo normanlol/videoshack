@@ -154,7 +154,7 @@ function runSearch() {
             if (json.results[c].desc !== undefined && json.results[c].desc !== null) {
                 var de = document.createElement("P");
                 if (json.results[c].desc.length > 201) {
-                    var desc = json.results[c].desc.substring(0, 200);
+                    var desc = json.results[c].desc.substring(0, 200) + "...";
                 } else {
                     var desc = json.results[c].desc;
                 }
