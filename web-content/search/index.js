@@ -159,6 +159,7 @@ function runSearch() {
                     var desc = json.results[c].desc;
                 }
                 de.innerHTML = escapeHtml(desc);
+                d.appendChild(de); 
             }
             div.appendChild(d);
             a.appendChild(div);
