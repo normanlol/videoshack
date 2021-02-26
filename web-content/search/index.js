@@ -148,7 +148,7 @@ function runSearch() {
             }
             if (json.results[c].viewCount !== undefined && json.results[c].viewCount !== null) {
                 var v = document.createElement("H4");
-                v.innerHTML = escapeHtml(json.results[c].viewCount).toLocaleString() + " views";
+                v.innerHTML = escapeHtml(json.results[c].viewCount.toLocaleString()) + " views";
                 d.appendChild(v); 
             }
             if (json.results[c].desc !== undefined && json.results[c].desc !== null) {
