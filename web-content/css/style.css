@@ -74,7 +74,7 @@ button[value="false"] {
 
 .result p {
     max-height:154px;
-    overflow-y:hidden;
+    overflow-y:scroll;
 }
 
 @media (max-width:1200px) {

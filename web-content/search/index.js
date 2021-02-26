@@ -122,19 +122,19 @@ function runSearch() {
             var d = document.createElement("DIV");
             var t = document.createElement("H2");
             if (json.results[c].title.length > 201) { var vidTit = json.results[c].title.substring(0,200) + "..."; } else { var vidTit = json.results[c].title; }
-            t.innerHTML = vidTit;
+            t.innerHTML = escapeHtml(vidTit);
             d.appendChild(t);
             if (json.results[c].creatorUrl && json.results[c].creatorUrl !== null) {
                 var authLink = document.createElement("A");
                 authLink.href = json.results[c].creatorUrl;
                 authLink.classList.add("hoverLink")
                 var auth = document.createElement("H3");
-                auth.innerHTML = "by " + json.results[c].creatorName + " from " + scrapers[index].safeName;
+                auth.innerHTML = "by " + escapeHtml(json.results[c].creatorName) + " from " + scrapers[index].safeName;
                 authLink.appendChild(auth);
                 d.appendChild(authLink);
             } else if (json.results[c].creatorName) {
                 var auth = document.createElement("H3");
-                auth.innerHTML = "by " + json.results[c].creatorName + " from " + scrapers[index].safeName;
+                auth.innerHTML = "by " + escapeHtml(json.results[c].creatorName) + " from " + scrapers[index].safeName;
                 d.appendChild(auth);
             } else {
                 var auth = document.createElement("H3");
@@ -143,17 +143,17 @@ function runSearch() {
             }
             if (json.results[c].uploadedAt !== undefined && json.results[c].uploadedAt !== null) {
                 var u = document.createElement("H4");
-                u.innerHTML = "Uploaded " + json.results[c].uploadedAt;
+                u.innerHTML = "Uploaded " + escapeHtml(json.results[c].uploadedAt);
                 d.appendChild(u); 
             }
             if (json.results[c].viewCount !== undefined && json.results[c].viewCount !== null) {
                 var v = document.createElement("H4");
-                v.innerHTML = json.results[c].viewCount.toLocaleString() + " views";
+                v.innerHTML = escapeHtml(json.results[c].viewCount).toLocaleString() + " views";
                 d.appendChild(v); 
             }
             if (json.results[c].desc !== undefined && json.results[c].desc !== null) {
                 var de = document.createElement("P");
-                de.innerHTML = json.results[c].desc;
+                de.innerHTML = escapeHtml(json.results[c].desc);
                 d.appendChild(de);
             }
             div.appendChild(d);
@@ -166,3 +166,12 @@ function runSearch() {
         runSearch();
     }
 }
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+ }
