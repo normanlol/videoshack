@@ -923,6 +923,20 @@ async function hostServer(request, response) {
                                 "x-tumblr-form-key": key
                             }
                         }).then(function(resp) {
+                            if (resp.body == "" || !resp.body) {
+                                var errObj = JSON.stringify({
+                                    "err": {
+                                        "message": "Unable to parse due to empty body.",
+                                        "code": "noBody"
+                                    }
+                                });
+                                response.writeHead(500, {
+                                    "Access-Control-Allow-Origin": "*",
+                                    "Content-Type": "application/json"
+                                });
+                                response.end(errObj);
+                                return;
+                            }
                             var j = JSON.parse(resp.body);
                             var $ = cheerio.load(j.response.posts_html);
                             fs.writeFileSync("tumblr.html", j.response.posts_html)
